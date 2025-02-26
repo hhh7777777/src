@@ -1,0 +1,116 @@
+/* 全局样式 */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.login-container, .register-container {
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 400px;
+    background-color: #fff;
+    border: 2px solid red; 
+    
+}
+
+body {
+    /* 弹性布局 水平+垂直居中 */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #fff;
+    
+    
+}
+
+/* 标题样式 */
+h1 {
+    width: 100%;
+    color: #333;
+    margin-bottom: 20px;
+    font-size: 30px;
+    text-align: center;
+        
+}
+h1 a{
+    color: red;
+    text-decoration: none;
+    position: absolute;
+    font-size: 20px;
+    right: 20px;
+}
+/* 表单样式 */
+.form-group {
+    margin-bottom: 20px;
+    text-align: left;
+    background-color: #fff;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #444;
+}
+
+input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 16px;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+input:focus {
+    border-color: #2575fc;
+    box-shadow: 0 0 5px rgba(37, 117, 252, 0.5);
+    outline: none;
+}
+
+button {
+    width: 100%;
+    padding: 12px;
+    background: #2575fc;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+button:hover {
+    background: #1b5fc2;
+}
+
+h1 p {
+    margin-top: 15px;
+    font-size: 14px;
+    color: #666;
+    text-align: center;
+}
+
+p a {
+    color: #2575fc;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+p a:hover {
+    text-decoration: underline;
+}
+
+/* 错误提示 */
+.error {
+    color: red;
+    margin-top: 10px;
+    display: none;
+    text-align: center;
+}

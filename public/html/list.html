@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <script src="/public/lib/axios.min.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>商品列表</title>
+  
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    h1 {
+        width: 100%;
+        height: 80px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: skyblue;
+        color: #fff;
+    }
+
+    h1>a {
+      font-size: 20px;
+      position: absolute;
+      top: 6%;
+      transform: translateY(-50%);
+      right: 50px;
+      color:red;
+    }
+
+    .goods-list {
+        width: 1200px;
+        margin: 20px auto;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+
+    .goods-item {
+        width: 280px;
+        border: 1px solid #ddd;
+        padding: 10px;
+    }
+
+    .goods-item img {
+        width: 100%;
+        height: 280px;
+        object-fit: cover;
+    }
+
+    .goods-info {
+        margin-top: 10px;
+    }
+
+    .goods-title {
+        font-size: 14px;
+        margin-bottom: 10px;
+        height: 40px;
+        overflow: hidden;
+    }
+
+    .price {
+        color: red;
+        font-size: 20px;
+    }
+
+    .original-price {
+        color: #999;
+        text-decoration: line-through;
+        margin-left: 10px;
+    }
+
+    .pagination {
+      border: 1px solid #333;
+      margin: 10px auto;
+      width: 1200px;
+      height: 80px;
+      background-color: #fff;
+      color: #fff;
+      display: flex;
+      justify-content: flex-start;
+      padding-left: 20px;
+      box-sizing: border-box;
+      align-items: center;
+    }
+
+    .first-page,
+    .prev-page,
+    .next-page,
+    .last-page {
+        padding: 5px 15px;
+        background: skyblue;
+        border: none;
+        cursor: pointer;
+        color: #fff;
+        margin-left: 12px;
+    }
+
+    .pagination button:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+        margin-left: 12px;
+    }
+
+    .page-info {
+      padding: 0 10px;
+      font-size: 20px;
+      color: #333;
+      margin-left: 12px;
+    }
+
+    .jump-input {
+      height: 30px;
+      width: 50px;
+      margin-left: 12px;
+    }
+
+    .jump-btn {
+      padding: 5px 10px 5px 10px;
+      font-size: 16px;
+      margin-left: 12px;
+    }
+
+    .page-size {
+        padding: 5px 10px 5px 10px;
+      font-size: 16px;
+      margin-left: 12px;
+    }
+
+    .tags {
+        position: absolute;
+        top: 0;
+        right: 0;
+    }
+
+    .tag {
+        padding: 2px 5px;
+        color: white;
+        font-size: 12px;
+    }
+
+    .tag-hot {
+        background-color: red;
+    }
+
+    .tag-discount {
+        background-color: orange;
+    }
+
+</style>
+</head>
+<body>
+    <h1>
+        <div class="header">仿站电商·商品列表</div>
+        <a href="/">回到首页</a>
+    </h1>
+
+    <div class="pagination">
+        <button class="first-page" onclick="changePage(1)">首页</button>
+        <button class="prev-page" onclick="changePage(currentPage - 1)">上一页</button>
+        <span class="page-info">1 / 100</span>
+        <button class="next-page" onclick="changePage(currentPage + 1)">下一页</button>
+        <button class="last-page" onclick="changePage(totalPages)">末页</button>
+        <input type="text" class="jump-input" onchange="goToPage(event)" style="width: 50px; height: 25px;">
+        <button class="jump-btn" onclick="goToPage()">跳转</button>
+        <select class="category-select" onchange="selectedCategory = this.value; fetchGoods();">
+        <option value="">请选择分类</option>
+        </select>
+        <select class="page-size" onchange="pageSize = this.value; fetchGoods();">
+            <option value="4">4</option>
+            <option value="8">8</option>
+            <option value="12">12</option>
+            <option value="16">16</option>
+            <option value="20">20</option>
+        </select>
+    </div>
+
+    <div class="goods-list" id="goodsList">
+        <!-- 商品列表将通过 JavaScript 动态生成 -->
+    </div>
+
+    <script>
+        let goodsList = [];
+        let currentPage = 1;
+        let pageSize = 12;
+        let totalPages = 0;
+        let categories = [];
+        let selectedCategory = '';
+        let saleType = '10';  // 默认设置为没有折扣
+        let sortType = 'id';  // 默认排序方式为 'id'
+        let sortMethod = 'ASC';  // 默认排序方式为升序
+    
+        // 获取商品列表
+        function fetchGoods() {
+            // 验证 saleType、sortType 和 sortMethod 是否符合后端要求
+            if (isNaN(saleType) || saleType < 5 || saleType > 10) {
+                saleType = '10';  // 默认没有折扣
+            }
+            if (!['id', 'sale', 'price'].includes(sortType)) {
+                sortType = 'id';  // 默认按 id 排序
+            }
+            if (!['ASC', 'DESC'].includes(sortMethod)) {
+                sortMethod = 'ASC';  // 默认升序
+            }
+
+            const params = {
+                current: currentPage,
+                pagesize: pageSize,
+                category: selectedCategory,
+                saleType: saleType,  // 确保传递 saleType 参数
+                sortType: sortType,  // 确保传递 sortType 参数
+                sortMethod: sortMethod,  // 确保传递有效的 sortMethod 参数
+                search: '',  // 可以添加搜索条件
+                filter: '',  // 可以添加筛选条件
+            };
+
+            axios.get('/goods/list', { params })
+                .then(response => {
+                    const data = response.data;
+                    console.log("获取商品数据成功：", data);
+                    if (data.code !== 1) {
+                        console.error("获取商品数据失败：", data.message);
+                        alert(data.message || '获取商品数据失败');
+                        return;
+                    }
+
+                    goodsList = data.list;
+                    totalPages = Math.ceil(data.total / pageSize);
+                    renderGoods(goodsList);
+                    updatePagination();
+                })
+                .catch(error => {
+                    console.error("Error fetching goods data:", error);
+                    alert("获取商品数据失败，请稍后再试！");
+                });
+        }
+
+        // 获取商品类别列表
+        function fetchCategories() {
+            axios.get('/goods/category')
+                .then(response => {
+                    const data = response.data;
+                    console.log("获取分类数据成功：", data);
+                    if (!data || !data.list) {
+                        console.error("获取分类数据失败，返回的数据格式不正确：", data);
+                        return;
+                    }
+
+                    categories = data.list;
+                    populateCategoryDropdown();
+                })
+                .catch(error => {
+                    console.error("Error fetching categories:", error);
+                });
+        }
+
+        // 填充类别下拉列表
+        function populateCategoryDropdown() {
+            const categorySelect = document.querySelector('.category-select');
+            if (!categorySelect) {
+                console.error("未找到 '.category-select' 元素！");
+                return;
+            }
+
+            categories.forEach(category => {
+                const option = document.createElement('option');
+                option.value = category;
+                option.textContent = category;
+                categorySelect.appendChild(option);
+            });
+        }
+        
+        // 渲染商品列表
+function renderGoods(goodsList) {
+  const container = document.getElementById('goodsList');
+  container.innerHTML = goodsList.map(item => `
+    <div class="goods-item" onclick="goToDetailPage(${item.goods_id})">
+      <img src="${item.img_big_logo}" alt="${item.title}">
+      <div class="goods-info">
+        <div class="goods-title">${item.title}</div>
+        <div>
+          <span class="price">￥${item.current_price}</span>
+          <span class="original-price">￥${item.price}</span>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// 跳转到商品详情页
+function goToDetailPage(goodsId) {
+  window.location.href = `/public/html/detail.html?id=${goodsId}`;
+  console.log(`跳转到商品详情页：${goodsId}`);
+}
+        // 更新分页的显示
+        function updatePagination() {
+            const pageInfo = document.querySelector('.page-info');
+            if (pageInfo) {
+                pageInfo.textContent = `${currentPage} / ${totalPages}`;
+            }
+        }
+
+        // 改变页面
+        function changePage(page) {
+            if (page < 1 || page > totalPages) return;
+            currentPage = page;
+            fetchGoods();
+        }
+
+        // 跳转到指定页面
+        function goToPage(event) {
+            const page = document.querySelector('.jump-input').value;
+            if (page && !isNaN(page) && page >= 1 && page <= totalPages) {
+                currentPage = parseInt(page);
+                fetchGoods();
+            }
+        }
+
+        function init() {
+    fetchCategories();
+    fetchGoods();
+}
+
+// 调用初始化函数
+init();
+    </script>
+</body>
+</html>

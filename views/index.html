@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>首页</title>
+    <script src="../public/lib/axios.min.js"></script>
+    <link rel="stylesheet" href="../css/index.css">
+    <link rel="stylesheet" href="../css/login.css">
+    <link rel="stylesheet" href="../public/lib/swiper/swiper-bundle.min.css">
+    <style>
+        * {
+          margin: 0;
+          padding: 0;
+        }
+    
+        h1 {
+          width: 100%;
+          height: 80px;
+          background-color: skyblue;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          position: relative;
+          color: #fff;
+        }
+    
+        h1>p {
+          font-size: 20px;
+          position: absolute;
+          top: 50%;
+          transform: translateY(-50%);
+          right: 50px;
+          display: none;
+        }
+    
+        h1>p.active {
+          display: block;
+        }
+    
+        h1>p>span {
+          color: write;
+        }
+
+        div>a {
+          display: flex;
+          justify-content: center;
+          font-size: 40px;
+          color: black;
+        }
+
+        .swiper {
+          width: 1000px;
+          height: 400px;
+    }
+        img{
+          width: 100%;
+          height: 100%;
+    }
+    
+      </style>
+</head>
+<body>
+    <h1>
+        仿站电商平台
+        <p class="off active ">您好！<a href="../public/html/login.html">请登录</a></p>
+        <p class="on ">你好！
+          <span class="nickname">用户昵称</span>
+          <button class="self">个人中心</button>
+          <button class="logout">退出登录</button>
+        </p>
+    </h1>
+    
+    <div class="list container">
+    <a href="../public/html/list.html">购买商品</a></div>
+    <script src="../public/lib/swiper/swiper-bundle.min.js"></script>
+    
+    <script src="../"></script>
+    <script src="../public/js/index.js"></script>
+
+    <div class="swiper">
+        <div class="swiper-wrapper">
+          <div class="swiper-slide"><img src="../public/img/img1.jpg" alt=""></div>
+          <div class="swiper-slide"><img src="../public/img/img2.jpg" alt=""></div>
+          <div class="swiper-slide"><img src="../public/img/img3.jpg" alt=""></div>
+          <div class="swiper-slide"><img src="../public/img/img4.jpg" alt=""></div>
+          <div class="swiper-slide"><img src="../public/img/img5.jpg" alt=""></div>
+        </div>
+        <!-- 如果需要分页器 -->
+        <div class="swiper-pagination"></div>
+    
+        <!-- 如果需要导航按钮 -->
+        <div class="swiper-button-prev"></div>
+        <div class="swiper-button-next"></div>
+    </div>
+      <script src="../public/lib/swiper/swiper-bundle.min.js"></script>
+      <script>
+        new Swiper('.swiper', {      
+          loop: true, // 循环模式选项
+    
+          // 如果需要分页器
+          pagination: {
+            el: '.swiper-pagination',
+          },
+    
+          // 如果需要前进后退按钮
+          navigation: {
+            nextEl: '.swiper-button-next',
+            prevEl: '.swiper-button-prev',
+          },
+          //自动播放功能
+          autoplay:true 
+        })    
+        document.addEventListener('DOMContentLoaded', async function () {
+      // 检查是否已登录并更新界面
+      var currentUser = JSON.parse(localStorage.getItem('currentUser'));
+      if (currentUser) {
+        var offElement = document.querySelector('p.off');
+        var onElement = document.querySelector('p.on');
+        var nicknameElement = document.querySelector('.nickname');
+        offElement.style.display = 'none';
+        onElement.style.display = 'block';
+        nicknameElement.textContent = currentUser.nickname;
+        var logoutButton = document.querySelector('.logout');
+        logoutButton.addEventListener('click', async function () {
+          localStorage.removeItem('currentUser');
+          localStorage.removeItem('token');
+          localStorage.removeItem('id');
+          try {
+            // 发送后端退出登录请求
+            await http.get('/users/logout',{ params: { id: currentUser.id } });
+            alert('退出登录成功');
+          } catch (error) {
+            console.error('后端退出登录出错:', error);
+            // 即使后端出错，也确保前端界面更新为未登录状态
+            alert('已清除本地登录信息');
+          } finally {
+            offElement.style.display = 'block';
+            onElement.style.display = 'none';
+            // 刷新页面，确保所有状态更新
+            window.location.reload();
+          }
+        });
+      }
+          // 获取个人中心按钮
+          var selfButton = document.querySelector('.self');
+        
+        // 为个人中心按钮添加点击事件监听器
+        selfButton.addEventListener('click', function () {
+            var currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            if (currentUser) {
+              window.location.href = `./public/html/self.html?id=${currentUser.id}`;
+            } else {
+              window.location.href = './public/html/login.html';
+            }
+          });
+        });
+  </script>
+</body>
+
+</html>
